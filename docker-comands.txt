@@ -1,0 +1,39 @@
+#CRIANDO A REDE
+docker network create audioria-network
+
+#CRIANDO POSTGRES
+docker run --name audioria-db -p 5432:5432 -e POSTGRES_PASSWORD=admin -e POSTGRES_USER=admin -e POSTGRES_DB=audioria --network audioria-network -d postgres:17.2
+
+#CRIANDO PGADMIN4
+docker run --name pgadmin4 -p 15432:80 -e PGADMIN_DEFAULT_EMAIL=admin@audioria.com -e PGADMIN_DEFAULT_PASSWORD=admin --network audioria-network -d dpage/pgadmin4
+
+#APÓS CRIAR A REDE E OS CONTAINERS, PARA INICIÁ-LOS:
+docker start audioria-db pgadmin4
+
+OU
+
+No Docker Desktop, dar play nos containers
+
+#DADOS PERSISTIDOS - CRIANDO VOLUME
+docker volume create audioria-db-data
+docker run --name audioria-db -p 5432:5432 \
+  -e POSTGRES_PASSWORD=admin -e POSTGRES_USER=admin -e POSTGRES_DB=audioria \
+  --network audioria-network -v audioria-db-data:/var/lib/postgresql/data -d postgres:17.2
+
+
+_______________________________________________
+PGADMIN
+
+http://localhost:15432/browser/
+admin@audioria.com
+admin
+
+-> Register Server
+    General:
+        Name: audioria-db
+    Connection:
+        Host name/address: audioria-db
+        Port: 5432
+        Maintenance database: audioria (Nome do banco definido no POSTGRES_DB)
+        Username: admin (Definido no POSTGRES_USER)
+        Password: admin (Definido no POSTGRES_PASSWORD)

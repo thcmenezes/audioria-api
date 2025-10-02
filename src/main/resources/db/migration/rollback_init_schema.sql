@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS collection_album;
+DROP TABLE IF EXISTS collection;
+DROP TABLE IF EXISTS album;
+DROP TABLE IF EXISTS artist;
