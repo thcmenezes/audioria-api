@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/artists")
+@RequestMapping("/api/artists")
 public class ArtistController {
 
     private final ArtistService artistService;
