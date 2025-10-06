@@ -1,5 +1,6 @@
 package com.github.thcmenezes.audioria_api.service.spotify;
 
+import com.github.thcmenezes.audioria_api.config.SpotifyProperties;
 import com.github.thcmenezes.audioria_api.model.dto.spotify.SpotifyTokenResponse;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;

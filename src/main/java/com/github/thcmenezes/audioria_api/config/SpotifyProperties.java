@@ -1,4 +1,4 @@
-package com.github.thcmenezes.audioria_api.service.spotify;
+package com.github.thcmenezes.audioria_api.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
