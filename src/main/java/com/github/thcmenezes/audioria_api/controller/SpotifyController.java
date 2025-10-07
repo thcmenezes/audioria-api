@@ -1,19 +1,22 @@
 package com.github.thcmenezes.audioria_api.controller;
 
-import com.github.thcmenezes.audioria_api.service.spotify.SpotifyAuthService;
+import com.github.thcmenezes.audioria_api.service.spotify.SpotifyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/spotify")
 public class SpotifyController {
-    private final SpotifyAuthService authService;
+    private final SpotifyService spotifyService;
 
-    @GetMapping("/token")
-    public String token() {
-        return authService.getAccessToken();
+    @PostMapping("/import_from_playlist")
+    public ResponseEntity<Map<String, String>> importFromPlaylist(@RequestParam("playlist_url") String playlistUrl) {
+        spotifyService.importFromPlaylist(playlistUrl);
+
+        return ResponseEntity.ok(Map.of("message", "Albums have been successfully imported"));
     }
 }

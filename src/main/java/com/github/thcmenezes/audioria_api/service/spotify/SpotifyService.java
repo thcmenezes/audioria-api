@@ -1,11 +1,6 @@
 package com.github.thcmenezes.audioria_api.service.spotify;
 
-import com.github.thcmenezes.audioria_api.model.dto.spotify.SpotifyAlbum;
-import com.github.thcmenezes.audioria_api.model.dto.spotify.SpotifyPlaylistItem;
-import com.github.thcmenezes.audioria_api.model.dto.spotify.SpotifyPlaylistResponse;
-import com.github.thcmenezes.audioria_api.model.dto.spotify.SpotifyTrack;
-import com.github.thcmenezes.audioria_api.repository.AlbumRepository;
-import com.github.thcmenezes.audioria_api.repository.ArtistRepository;
+import com.github.thcmenezes.audioria_api.model.dto.spotify.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -19,12 +14,12 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class SpotifyService {
+
     private final SpotifyAuthService authService;
-    private final ArtistRepository artistRepository;
-    private final AlbumRepository albumRepository;
+    private final SpotifyPersistenceService persistenceService;
 
     public void importFromPlaylist(String playlistUrl) {
-        String playlistId = extractPlaylistId(playlistUrl);
+        String playlistId = SpotifyUtils.extractPlaylistId(playlistUrl);
         String token = authService.getAccessToken();
 
         RestTemplate restTemplate = new RestTemplate();
@@ -38,7 +33,6 @@ public class SpotifyService {
         boolean more = true;
 
         Set<String> processedAlbums = new HashSet<>();
-        Set<String> processedArtists = new HashSet<>();
 
         while (more) {
             String url = String.format(
@@ -67,32 +61,22 @@ public class SpotifyService {
 
                         SpotifyAlbum album = track.album();
                         String albumName = album != null ? album.name() : "Unknown";
-                        String releaseYear = extractAlbumReleaseYear(album != null ? album.releaseDate() : null);
+                        Integer releaseYear = Optional.ofNullable(album)
+                                .map(a -> SpotifyUtils.extractAlbumReleaseYear(a.releaseDate()))
+                                .map(Integer::parseInt)
+                                .orElse(null);
 
                         if (processedAlbums.add(albumName)) {
-                            System.out.printf("💿 Novo álbum: %s (%s)%n", albumName, releaseYear);
-                            // albumRepository.saveIfNotExists(albumName, releaseYear);
-                        }
-
-                        if (processedArtists.add(artistName)) {
-                            System.out.printf("🎤 Novo artista: %s%n", artistName);
-                            // artistRepository.saveIfNotExists(artistName);
+                            System.out.printf("💿 Gravando álbum: %s (%d) — %s%n", albumName, releaseYear, artistName);
+                            persistenceService.saveArtistAndAlbum(
+                                    artistName,
+                                    albumName,
+                                    releaseYear
+                            );
                         }
                     });
 
             offset += limit;
         }
     }
-
-    private String extractPlaylistId(String url) {
-        String[] parts = url.split("/");
-        String lastPart = parts[parts.length - 1];
-        return lastPart.contains("?") ? lastPart.substring(0, lastPart.indexOf("?")) : lastPart;
-    }
-
-    private String extractAlbumReleaseYear(String releaseDate) {
-        if (releaseDate == null || releaseDate.isBlank()) return "????";
-        return releaseDate.length() >= 4 ? releaseDate.substring(0, 4) : releaseDate;
-    }
-
 }
