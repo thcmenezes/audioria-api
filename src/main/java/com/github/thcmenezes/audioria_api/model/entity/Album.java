@@ -2,6 +2,8 @@ package com.github.thcmenezes.audioria_api.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -32,4 +34,10 @@ public class Album {
 
     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CollectionAlbum> collections = new ArrayList<>();
+
+    @Setter
+    @Getter
+    @Transient
+    private int tempScore;
+
 }

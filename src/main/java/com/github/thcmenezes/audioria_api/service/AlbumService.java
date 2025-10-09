@@ -2,8 +2,10 @@ package com.github.thcmenezes.audioria_api.service;
 
 import com.github.thcmenezes.audioria_api.model.dto.AlbumDTO;
 import com.github.thcmenezes.audioria_api.model.entity.Album;
+import com.github.thcmenezes.audioria_api.model.entity.AlbumRating;
 import com.github.thcmenezes.audioria_api.model.entity.Artist;
 import com.github.thcmenezes.audioria_api.model.mapper.AlbumMapper;
+import com.github.thcmenezes.audioria_api.repository.AlbumRatingRepository;
 import com.github.thcmenezes.audioria_api.repository.AlbumRepository;
 import com.github.thcmenezes.audioria_api.repository.ArtistRepository;
 import com.github.thcmenezes.audioria_api.exception.AlbumException;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final ArtistRepository artistRepository;
+    private final AlbumRatingRepository albumRatingRepository;
 
     public Album create(AlbumDTO albumData) {
         Artist artist = artistRepository.findById(albumData.artistId())
@@ -71,4 +74,21 @@ public class AlbumService {
     public List<Album> findByArtistName(String artistName) {
         return albumRepository.findByArtistNameIgnoreCase(artistName);
     }
+
+    public List<Album> getAlbumsRanking() {
+        List<Album> albums = albumRepository.findAll();
+
+        albums.forEach(album -> {
+            int score = albumRatingRepository.findByAlbumId(album.getId())
+                    .stream()
+                    .mapToInt(AlbumRating::getScore)
+                    .sum();
+            album.setTempScore(score);
+        });
+
+        return albums.stream()
+                .sorted((a, b) -> Integer.compare(b.getTempScore(), a.getTempScore()))
+                .toList();
+    }
+
 }
